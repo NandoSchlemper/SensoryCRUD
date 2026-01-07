@@ -2,9 +2,9 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { fakeDatabase } from "./productsFakeData.js";
 
-// Esquema do produto - use string para datas já que estamos trabalhando com JSON
+// arrumarndo
 const productSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().min(3).max(100),
   price: z.number().positive(),
   category: z.enum(['eletronicos', 'vestuario', 'alimentos']),
