@@ -1,12 +1,14 @@
 {
   "$schema": "https://www.schemastore.org/tsconfig",
   "_version": "22.0.0",
-
+  "include": ["./api/**/*"],
+  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "lib": ["es2024", "ESNext.Array", "ESNext.Collection", "ESNext.Iterator"],
     "module": "nodenext",
     "target": "es2022",
-
+    "outDir": "./dist",
+    "rootDir": "./api",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
