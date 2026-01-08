@@ -1,5 +1,5 @@
 import { fastify } from 'fastify';
-import { productsRoute } from './routes/products.js';
+import { productsRoute } from './routes/productRoutes.js';
 import {
   serializerCompiler,
   validatorCompiler, 
