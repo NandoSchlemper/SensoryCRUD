@@ -37,9 +37,9 @@ export const productsRoute: FastifyPluginAsyncZod = async app => {
         description: "Retorna uma lista paginada com todos os produtos com possibilidade de busca.",
         tags: ['products'], // tenho q ver praq q serve isso dps
         querystring: PaginationSchema,
-        headers: z.object({
-          'y-z-x-api-key-hehe-lul-kekw': z.string().optional() // me arrependi de ter feito isso
-        }),
+        // headers: z.object({
+        //   'y-z-x-api-key-hehe-lul-kekw': z.string().optional()
+        // }),
         response: {
           200: z.object({
             success: z.boolean(),
@@ -79,7 +79,7 @@ export const productsRoute: FastifyPluginAsyncZod = async app => {
 
       try {
         const {page, limit, search} = request.query;
-        const apikey = request.headers['y-z-x-api-key-hehe-lul-kekw'];
+        // const apikey = request.headers['y-z-x-api-key-hehe-lul-kekw'];
         const ipaddr = request.ip;
         const httpMethod = request.method
         const url = request.url
@@ -90,14 +90,14 @@ export const productsRoute: FastifyPluginAsyncZod = async app => {
           url,
           ip: ipaddr,
           query: request.query,
-          headers: {'y-z-x-api-key-hehe-lul-kekw': apikey ? '****': 'none'},
+          // headers: {'y-z-x-api-key-hehe-lul-kekw': apikey ? '****': 'none'},
         }, 'Requisição Recebida');
 
-        if (!apikey) {
-          return reply.status(401).send({
-            error: "API Key é obrigatória para continuar bro... wtf are u doing?"
-          })
-        }
+        // if (!apikey) {
+        //   return reply.status(401).send({
+        //     error: "API Key é obrigatória para continuar bro... wtf are u doing?"
+        //   })
+        // }
 
         const filteredProducts = filterProducts(fakeDatabase, search)
         const startIndex = (page - 1) * limit

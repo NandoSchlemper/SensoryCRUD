@@ -17,7 +17,7 @@ RUN pnpm run build
 
 FROM base AS prod
 WORKDIR /api
-COPY package*.json ./
+COPY package*.json pnpm-lock.yaml ./
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --prod --frozen-lockfile
 
