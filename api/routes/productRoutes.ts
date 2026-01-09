@@ -138,7 +138,7 @@ export const productsRoute: FastifyPluginAsyncZod = async app => {
         }, 'Erro ao processar requisição');
         
         return reply.status(500).send({
-          error: "Erro interno do servidor, porra."
+          error: "Erro interno do servidor :("
         });
       }
     }
