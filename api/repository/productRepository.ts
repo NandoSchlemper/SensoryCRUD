@@ -1,11 +1,20 @@
-import { IProduct, Product } from "../models/product.js"
+import { Product, ProductModel } from "../models/product.js";
 
-type ProductDTO = Omit<IProduct, 'updatedAt' | 'createdAt'>
 
-export default interface IProductRepository {
-  saveBook: (product: ProductDTO) => Promise<IProduct>
+export interface IProductRepository {
+  findById(id: string): Promise<Product|null>
+  create(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product>
 }
 
-export default class ProductRepository implements IProductRepository {
-  private ProductCollection: Product 
+export class ProductRepository implements IProductRepository {
+  async findById(id: string): Promise<Product | null> {
+    return await ProductModel.findById(id).lean()
+  }
+
+  async create(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
+    const created = new ProductModel(product)
+    const saved = await created.save()
+    console.log(saved.toJSON())
+    return saved.toObject()
+  }
 }

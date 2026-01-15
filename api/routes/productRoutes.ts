@@ -1,17 +1,7 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { fakeDatabase } from "./productsFakeData.js";
-
-// arrumarndo
-const productSchema = z.object({
-  id: z.uuid(),
-  name: z.string().min(3).max(100),
-  price: z.number().positive(),
-  category: z.enum(['eletronicos', 'vestuario', 'alimentos']),
-  inStock: z.boolean().default(true),
-  createdAt: z.string(),
-  updatedAt: z.string().optional(),
-});
+import { ProductError400Schema, ProductErrorSchema, ProductGETPaginationSuccessSchema } from "../zod/product.js";
 
 const PaginationSchema = z.object({
   page: z.coerce.number().min(1).default(1), // tem q converter p number
@@ -35,79 +25,33 @@ export const productsRoute: FastifyPluginAsyncZod = async app => {
       schema: {
         summary: "Obter produtos com filtragem paginada.",
         description: "Retorna uma lista paginada com todos os produtos com possibilidade de busca.",
-        tags: ['products'], // tenho q ver praq q serve isso dps
+        tags: ['products'], // praq q serve isso?
         querystring: PaginationSchema,
         // headers: z.object({
         //   'y-z-x-api-key-hehe-lul-kekw': z.string().optional()
         // }),
         response: {
-          200: z.object({
-            success: z.boolean(),
-            data: z.array(productSchema),
-            pagination: z.object({
-              page: z.number(),
-              limit: z.number(),
-              total: z.number(),
-              totalPages: z.number(),
-              hasNextPage: z.boolean().optional(), 
-              hasPreviousPage: z.boolean().optional() 
-            }),
-            metadata: z.object({
-              requestId: z.string(),
-              processingTime: z.number()
-            })
-          }),
-          400: z.object({
-            error: z.string(),
-            details: z.array(z.object({
-              field: z.string(),
-              message: z.string()
-            }))
-          }),
-          401: z.object({
-            error: z.string()
-          }),
-          500: z.object({
-            error: z.string()
-          })
+          200: ProductGETPaginationSuccessSchema,
+          400: ProductError400Schema,
+          401: ProductErrorSchema,
+          500: ProductErrorSchema,
         },
       },
     },
     async (request, reply) => {
       const startTime = Date.now()
       const requestId = `req_123`
+      const {page, limit, search} = request.query;
 
+      const filteredProducts = filterProducts(fakeDatabase, search)
+      const startIndex = (page - 1) * limit
+      const endIndex = page * limit
+      const paginatedProducts = filteredProducts.slice(startIndex, endIndex)
+      const total = filteredProducts.length
+      const totalPages = Math.ceil(total/limit)
+      
+      const processingTime = Date.now() - startTime
       try {
-        const {page, limit, search} = request.query;
-        // const apikey = request.headers['y-z-x-api-key-hehe-lul-kekw'];
-        const ipaddr = request.ip;
-        const httpMethod = request.method
-        const url = request.url
-
-        app.log.info({
-          requestId,
-          method: httpMethod,
-          url,
-          ip: ipaddr,
-          query: request.query,
-          // headers: {'y-z-x-api-key-hehe-lul-kekw': apikey ? '****': 'none'},
-        }, 'Requisição Recebida');
-
-        // if (!apikey) {
-        //   return reply.status(401).send({
-        //     error: "API Key é obrigatória para continuar bro... wtf are u doing?"
-        //   })
-        // }
-
-        const filteredProducts = filterProducts(fakeDatabase, search)
-        const startIndex = (page - 1) * limit
-        const endIndex = page * limit
-        const paginatedProducts = filteredProducts.slice(startIndex, endIndex)
-        const total = filteredProducts.length
-        const totalPages = Math.ceil(total/limit)
-        
-        const processingTime = Date.now() - startTime
-
         reply.header('X-Request-Id', requestId)
         reply.header('X-Processing-Time', `${processingTime}ms`)
         reply.header('X-Total-Count', total.toString())
@@ -144,3 +88,23 @@ export const productsRoute: FastifyPluginAsyncZod = async app => {
     }
   );
 };
+
+// Caso for colocar em PROD é legal ter os metadados das requisições:
+// const apikey = request.headers['y-z-x-api-key-hehe-lul-kekw'];
+// const ipaddr = request.ip;
+// const httpMethod = request.method
+// const url = request.url
+
+// app.log.info({
+//   requestId,
+//   method: httpMethod,
+//   url,
+//   ip: ipaddr,
+//   query: request.query,
+//   // headers: {'y-z-x-api-key-hehe-lul-kekw': apikey ? '****': 'none'},
+// }, 'Requisição Recebida');
+// if (!apikey) {
+//   return reply.status(401).send({
+//     error: "API Key é obrigatória para continuar bro... wtf are u doing?"
+//   })
+// }

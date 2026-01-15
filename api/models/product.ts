@@ -1,25 +1,27 @@
-import mongoose, {Date, Schema} from "mongoose";
+import mongoose, { Schema} from "mongoose";
 
-export interface IProduct {
-  name: string,
-  price: number,
-  category: 'eletronicos' | 'vestuario' | 'alimentos',
-  inStock: boolean,
-  createdAt: Date,
-  updatedAt: Date,
+enum ProductCategory {
+  vestuario = 'vestuario',
+  eletronicos = 'eletronicos',
+  alimentos = 'alimentos'
 }
 
-const Product = new Schema<IProduct>({
+export interface Product {
+  name: string,
+  price: number,
+  category: 'vestuario' | 'eletronicos' | 'alimentos',
+  inStock: boolean,
+}
+
+const ProductSchema = new Schema({
   name: {type: String, required: true},
   price: {type: Number, required: true},
-  category: {type: String, required: true},
+  category: {type: String, enum: Object.values(ProductCategory), required: true},
   inStock: {type: Boolean, required: true},
-  createdAt: {type: Date, required: true},
-  updatedAt: {type: Date, default: Date.now(), required: true}
 }, {
   timestamps: true,
   versionKey: false,
  }
 )
 
-export default mongoose.model<IProduct>('Product', Product);
+export const ProductModel = mongoose.model('Product', ProductSchema)
